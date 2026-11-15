@@ -1,0 +1,1044 @@
+/* ==========================================================================
+   Baby Temp 24 - Parent Care Edition (สไตล์ระบบโรงพยาบาลสำหรับผู้ปกครอง)
+   Modern Medical Design System: Emerald/Teal & Slate Palette
+   ========================================================================== */
+
+:root {
+  /* Medical Brand Theme (matching Hospital Ward Monitor) */
+  --primary: #0d9488;          /* Teal 600 */
+  --primary-hover: #0f766e;    /* Teal 700 */
+  --primary-light: #f0fdfa;    /* Teal 50 */
+  --primary-border: #99f6e4;   /* Teal 200 */
+  --emerald: #10b981;          /* Emerald 500 */
+  --emerald-dark: #047857;     /* Emerald 700 */
+  --emerald-light: #ecfdf5;    /* Emerald 50 */
+
+  /* Temperature Fever States */
+  --temp-normal: #10b981;
+  --temp-normal-bg: #ecfdf5;
+  --temp-normal-border: #a7f3d0;
+  --temp-normal-text: #065f46;
+
+  --temp-low: #f59e0b;
+  --temp-low-bg: #fffbeb;
+  --temp-low-border: #fde68a;
+  --temp-low-text: #92400e;
+
+  --temp-high: #f97316;
+  --temp-high-bg: #fff7ed;
+  --temp-high-border: #fed7aa;
+  --temp-high-text: #9a3412;
+
+  --temp-crit: #ef4444;
+  --temp-crit-bg: #fef2f2;
+  --temp-crit-border: #fecaca;
+  --temp-crit-text: #991b1b;
+
+  /* Neutrals & Surfaces */
+  --bg-main: #f4f7f9;          /* Medical soft slate */
+  --bg-card: #ffffff;
+  --border-color: #e2e8f0;      /* Slate 200 */
+  --border-subtle: #f1f5f9;    /* Slate 100 */
+  --text-main: #0f172a;        /* Slate 900 */
+  --text-muted: #64748b;       /* Slate 500 */
+  --text-sub: #94a3b8;         /* Slate 400 */
+
+  /* Shadows & Radii */
+  --shadow-2xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.06), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* Typography */
+  --font-family: 'Plus Jakarta Sans', 'Prompt', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  line-height: 1.5;
+  padding-bottom: 92px; /* Space for bottom navigation */
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* App Container - Optimized for mobile & tablet */
+.app-container {
+  max-width: 580px;
+  margin: 0 auto;
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ==========================================================================
+   Header (สไตล์เดียวกับหน้าจอพยาบาล Hospital Ward)
+   ========================================================================== */
+.parent-header {
+  background: #ffffff;
+  border-bottom: 1px solid var(--border-color);
+  padding: 12px 16px;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-icon-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, #10b981, #0d9488);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  box-shadow: 0 2px 6px rgba(13, 148, 136, 0.25);
+  flex-shrink: 0;
+}
+
+.brand-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.brand-sub {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  color: var(--text-main);
+  transition: all 0.15s ease;
+}
+
+.btn-icon:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.btn-icon.active {
+  background: var(--primary-light);
+  border-color: var(--primary-border);
+  color: var(--primary-hover);
+}
+
+/* Baby Profile Bar / Sub-header Strip */
+.baby-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8fafc;
+  border-radius: var(--radius-lg);
+  padding: 8px 12px;
+  margin-top: 10px;
+  border: 1px solid var(--border-color);
+}
+
+.baby-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.baby-avatar-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+.baby-avatar-btn:hover {
+  transform: scale(1.05);
+}
+
+.baby-details {
+  min-width: 0;
+}
+
+.baby-name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.baby-name {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.baby-hn-badge {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #047857;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: 6px;
+  padding: 1px 5px;
+}
+
+.baby-meta {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 1px;
+}
+
+/* Connection Pill */
+.connection-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.connection-pill.online {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #065f46;
+}
+
+.connection-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  display: inline-block;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.connection-pill:not(.online) .connection-dot {
+  background: #f59e0b;
+}
+
+/* Notification Banners */
+.demo-banner, .offline-alert-banner {
+  padding: 10px 16px;
+  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 1px solid transparent;
+}
+
+.demo-banner {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #92400e;
+}
+
+.offline-alert-banner {
+  background: #fff1f2;
+  border-color: #fecdd3;
+  color: #be123c;
+  border-radius: var(--radius-lg);
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-xs);
+}
+
+/* Main Content Area */
+.main-content {
+  padding: 14px 16px;
+  flex: 1;
+}
+
+.tab-content {
+  display: none;
+  animation: fadeIn 0.15s ease-out;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   Hero Monitor Card (เหมือน BedCard ของโรงพยาบาล แต่จัดใหญ่ให้ดูง่าย)
+   ========================================================================== */
+.hero-card {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: 22px 20px 18px;
+  text-align: center;
+  position: relative;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.25s ease;
+}
+
+/* Status-based Border Glow */
+.hero-card.normal {
+  border-color: #a7f3d0;
+  box-shadow: 0 4px 14px -3px rgba(16, 185, 129, 0.15);
+}
+
+.hero-card.low {
+  border-color: #fde68a;
+  box-shadow: 0 4px 14px -3px rgba(245, 158, 11, 0.2);
+}
+
+.hero-card.high, .hero-card.crit {
+  border-color: #fecdd3;
+  box-shadow: 0 4px 18px -2px rgba(244, 63, 94, 0.25);
+  animation: pulseCard 2s infinite ease-in-out;
+}
+
+@keyframes pulseCard {
+  0%, 100% { border-color: #fecdd3; }
+  50% { border-color: #f43f5e; }
+}
+
+.hero-temp-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 2px;
+  margin: 4px 0 10px;
+}
+
+.hero-temp-val {
+  font-family: var(--font-mono);
+  font-size: 3.8rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: #0f172a;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.hero-temp-unit {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+/* Status Badge */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
+.status-badge.normal {
+  background: var(--temp-normal-bg);
+  border: 1px solid var(--temp-normal-border);
+  color: var(--temp-normal-text);
+}
+
+.status-badge.low {
+  background: var(--temp-low-bg);
+  border: 1px solid var(--temp-low-border);
+  color: var(--temp-low-text);
+}
+
+.status-badge.high {
+  background: var(--temp-high-bg);
+  border: 1px solid var(--temp-high-border);
+  color: var(--temp-high-text);
+}
+
+.status-badge.crit {
+  background: var(--temp-crit-bg);
+  border: 1px solid var(--temp-crit-border);
+  color: var(--temp-crit-text);
+}
+
+/* Color Gauge Bar */
+.thermo-bar-wrapper {
+  margin: 10px 0 16px;
+}
+
+.thermo-bar-track {
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  position: relative;
+}
+
+.thermo-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: linear-gradient(90deg, #10b981 0%, #f59e0b 60%, #ef4444 100%);
+  transition: width 0.4s ease;
+}
+
+.thermo-markers {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  color: var(--text-sub);
+  margin-top: 4px;
+  font-family: var(--font-mono);
+}
+
+/* Quick Stats Strip */
+.hero-stats-strip {
+  display: grid;
+  grid-cols: 3;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  border-top: 1px solid var(--border-color);
+  padding-top: 14px;
+  margin-top: 4px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.stat-val {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #0f172a;
+  margin-top: 2px;
+}
+
+/* ==========================================================================
+   Care Advice Box (กล่องคำแนะนำคุณหมอแบบเรียลไทม์)
+   ========================================================================== */
+.advice-box {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  margin-top: 12px;
+  display: flex;
+  gap: 12px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-xs);
+}
+
+.advice-box.normal {
+  background: #f0fdfa;
+  border-color: #ccfbf1;
+}
+
+.advice-box.low {
+  background: #fffbeb;
+  border-color: #fef3c7;
+}
+
+.advice-box.high, .advice-box.crit {
+  background: #fff1f2;
+  border-color: #ffe4e6;
+}
+
+.advice-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.advice-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.3;
+}
+
+.advice-desc {
+  font-size: 0.78rem;
+  color: #475569;
+  margin-top: 3px;
+  line-height: 1.45;
+}
+
+/* ==========================================================================
+   Medication Timer Card (นาฬิกานับรอบยาถัดไป)
+   ========================================================================== */
+.med-timer-card {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow-xs);
+}
+
+.med-timer-tag {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #0d9488;
+  background: #f0fdfa;
+  border: 1px solid #ccfbf1;
+  border-radius: 6px;
+  padding: 2px 7px;
+  margin-bottom: 4px;
+}
+
+.med-timer-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.med-timer-sub {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.med-countdown-circle {
+  width: 64px;
+  height: 64px;
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.med-countdown-circle svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.med-circle-bg {
+  fill: none;
+  stroke: #e2e8f0;
+  stroke-width: 5;
+}
+
+.med-circle-fill {
+  fill: none;
+  stroke: #0d9488;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-dasharray: 188.5;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+.med-countdown-text {
+  position: absolute;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #0f172a;
+  text-align: center;
+}
+
+/* ==========================================================================
+   Quick Actions Grid (ปุ่มบันทึกการดูแลด่วน)
+   ========================================================================== */
+.quick-actions-card {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  margin-top: 12px;
+  box-shadow: var(--shadow-xs);
+}
+
+.section-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 12px;
+}
+
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.btn-quick-action {
+  background: #f8fafc;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 10px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-quick-action:hover {
+  background: #f0fdfa;
+  border-color: var(--primary-border);
+  transform: translateY(-1px);
+}
+
+.btn-quick-action:active {
+  transform: scale(0.97);
+}
+
+.action-icon {
+  font-size: 22px;
+}
+
+.action-text {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #334155;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   Chart Card (กราฟแนวโน้มอุณหภูมิสไตล์โรงพยาบาล)
+   ========================================================================== */
+.chart-card {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-top: 12px;
+  box-shadow: var(--shadow-xs);
+}
+
+.chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chart-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.chart-range-pills {
+  display: flex;
+  background: #f1f5f9;
+  padding: 2px;
+  border-radius: var(--radius-md);
+  gap: 2px;
+}
+
+.btn-range-pill {
+  border: none;
+  background: transparent;
+  padding: 4px 9px;
+  border-radius: var(--radius-sm);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-range-pill.active {
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.chart-wrapper {
+  position: relative;
+  height: 200px;
+  width: 100%;
+}
+
+/* ==========================================================================
+   Tab 2: Medication Calculator Cards
+   ========================================================================== */
+.calc-card, .timeline-card, .guide-card {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 18px 16px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow-xs);
+}
+
+.calc-result-box {
+  background: #f0fdfa;
+  border: 1px solid var(--primary-border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  text-align: center;
+  margin: 14px 0;
+}
+
+.calc-result-number {
+  font-family: var(--font-mono);
+  font-size: 2.8rem;
+  font-weight: 800;
+  color: #0f766e;
+  line-height: 1;
+}
+
+.calc-result-unit {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0d9488;
+}
+
+.calc-spoon-hint {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #047857;
+  margin-top: 4px;
+}
+
+/* Forms & Inputs */
+.form-row {
+  margin-bottom: 14px;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 5px;
+}
+
+.form-input, .form-select {
+  width: 100%;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  background: #ffffff;
+  padding: 9px 12px;
+  font-size: 0.88rem;
+  font-family: var(--font-family);
+  color: #0f172a;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.form-input:focus, .form-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+}
+
+.form-range {
+  width: 100%;
+  accent-color: var(--primary);
+}
+
+/* Generic Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+}
+
+.btn-primary {
+  background: #0d9488;
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background: #0f766e;
+}
+
+.btn-outline {
+  background: #ffffff;
+  border-color: var(--border-color);
+  color: #334155;
+}
+
+.btn-outline:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* Timeline Care Logs */
+.timeline-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Red Flags Guide Items */
+.red-flag-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #fee2e2;
+  font-size: 0.85rem;
+  color: #991b1b;
+}
+
+.red-flag-item:last-child {
+  border-bottom: none;
+}
+
+.guide-step {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.step-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #f0fdfa;
+  border: 1px solid var(--primary-border);
+  color: var(--primary-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.78rem;
+  flex-shrink: 0;
+}
+
+/* Settings Group */
+.settings-group {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-xs);
+}
+
+/* ==========================================================================
+   Bottom Navigation Bar (แถบเมนูข้างล่าง)
+   ========================================================================== */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-width: 580px;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 6px;
+  z-index: 50;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.04);
+}
+
+.nav-tab-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px 2px;
+  border-radius: var(--radius-md);
+  transition: all 0.15s ease;
+}
+
+.nav-icon {
+  font-size: 20px;
+  transition: transform 0.15s ease;
+}
+
+.nav-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.nav-tab-btn.active .nav-icon {
+  transform: translateY(-2px);
+}
+
+.nav-tab-btn.active .nav-label {
+  color: #0d9488;
+  font-weight: 700;
+}
+
+/* Modals */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(3px);
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+.modal-sheet {
+  background: #ffffff;
+  width: 100%;
+  max-width: 580px;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  padding: 20px;
+  max-height: 85vh;
+  overflow-y: auto;
+  animation: slideUp 0.2s ease-out;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.modal-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.modal-close-btn {
+  background: #f1f5f9;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  color: #64748b;
+}
+
+/* Toast Box */
+.toast-box {
+  position: fixed;
+  bottom: 84px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: #0f172a;
+  color: #ffffff;
+  padding: 9px 18px;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.25s ease;
+  z-index: 120;
+  white-space: nowrap;
+}
+
+.toast-box.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}

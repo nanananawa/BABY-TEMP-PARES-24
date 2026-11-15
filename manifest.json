@@ -1,0 +1,29 @@
+{
+  "name": "Baby Temp 24 ผู้ปกครอง - ติดตามไข้ลูกน้อย",
+  "short_name": "Baby Temp 24",
+  "description": "เว็บแอปพลิเคชันสำหรับคุณพ่อคุณแม่ ติดตามอุณหภูมิร่างกายลูกน้อยแบบเรียลไทม์ คำนวณยาพาราฯ และบันทึกการดูแล",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f4f7f9",
+  "theme_color": "#0d9488",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
