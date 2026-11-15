@@ -1,7 +1,7 @@
 // BabyTemp Parent Companion - Application Logic
 // ออกแบบสำหรับคุณพ่อคุณแม่และผู้ปกครอง ติดตามไข้ลูกน้อยแบบเรียลไทม์
 
-const DEFAULT_FIREBASE_URL = "https://babytemp-9beab-default-rtdb.asia-southeast1.firebasedatabase.app";
+const DEFAULT_FIREBASE_URL = "https://babyteam-parent-default-rtdb.asia-southeast1.firebasedatabase.app";
 const LOCAL_STORAGE_KEY = "babytemp_parent_state_v1";
 
 let state = {
@@ -77,7 +77,11 @@ function loadState() {
       if (parsed.baby) state.baby = { ...state.baby, ...parsed.baby };
       if (parsed.activeWorkingSeconds) state.activeWorkingSeconds = parsed.activeWorkingSeconds;
       if (parsed.deepSleepMinutes) state.deepSleepMinutes = parsed.deepSleepMinutes;
-      if (parsed.firebaseUrl) state.firebaseUrl = parsed.firebaseUrl;
+      if (parsed.firebaseUrl && !parsed.firebaseUrl.includes("babytemp-9beab")) {
+        state.firebaseUrl = parsed.firebaseUrl;
+      } else {
+        state.firebaseUrl = DEFAULT_FIREBASE_URL;
+      }
       if (parsed.alertThreshold) state.alertThreshold = parsed.alertThreshold;
       if (typeof parsed.soundEnabled !== "undefined") state.soundEnabled = parsed.soundEnabled;
       if (parsed.mode) state.mode = parsed.mode;
@@ -204,7 +208,7 @@ function getFeverInfo(temp, sensorError = false) {
       badgeClass: "error",
       emoji: "🔌",
       title: "🚨 ตรวจไม่พบเซนเซอร์ DS18B20!",
-      advice: "สายเซนเซอร์อาจหลุด หลวม หรือชำรุด กรุณาตรวจสอบการต่อสายเซนเซอร์ที่ตัวน้องและบอร์ด ESP32 ทันทีค่ะ"
+      advice: "สายเซนเซอร์อาจหลุด หลวม หรือชำรุด กรุณาตรวจสอบการต่อสายเซนเซอร์ที่ตัวน้องและตัวอุปกรณ์ทันทีค่ะ"
     };
   } else if (temp < 37.5) {
     return {
@@ -254,6 +258,10 @@ function updateUI() {
   document.getElementById("headerBabyAge").textContent = state.baby.age ? `อายุ ${state.baby.age}` : "";
   document.getElementById("headerBabyWeight").textContent = state.baby.weight ? `น้ำหนัก ${state.baby.weight} กก.` : "";
   document.getElementById("headerBattery").textContent = `🔋 ${state.battery || 95}%`;
+  const sleepBadge = document.getElementById("headerSleepBadge");
+  if (sleepBadge) {
+    sleepBadge.textContent = `⏱️ วัดทุก ${state.deepSleepMinutes || 5} นาที`;
+  }
 
   // 2. Hero Card
   const heroCard = document.getElementById("heroCard");
@@ -1204,6 +1212,22 @@ async function syncTimingToFirebase() {
     showToast("⚠️ ไม่สามารถซิงก์ Firebase ได้ โปรดตรวจ URL หรืออินเทอร์เน็ต");
   }
 }
+
+function setDeepSleepPreset(minutes) {
+  const sleepInput = document.getElementById("settingSleepMinutes");
+  if (sleepInput) {
+    sleepInput.value = minutes;
+  }
+  const lbl = document.getElementById("valSleepMinutes");
+  if (lbl) {
+    lbl.textContent = minutes;
+  }
+  state.deepSleepMinutes = minutes;
+  saveState();
+  updateUI();
+  void syncTimingToFirebase();
+}
+window.setDeepSleepPreset = setDeepSleepPreset;
 
 function saveParentSettings() {
   const hn = (document.getElementById("settingBabyHn")?.value || "").trim();

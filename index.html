@@ -68,6 +68,7 @@
               <span class="baby-name" id="headerBabyName">น้องพอใจ</span>
               <span id="headerBabyHn" class="baby-hn-badge">HN: 00123</span>
               <span id="headerBattery" style="font-size: 0.75rem; color: #15803d; font-weight: 600;">🔋 95%</span>
+              <span id="headerSleepBadge" style="cursor: pointer; font-size: 0.72rem; background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; padding: 1px 6px; border-radius: 9999px; font-weight: 600;" onclick="switchTab('settings')" title="คลิกเพื่อปรับรอบเวลาวัดไข้">⏱️ วัดทุก 5 นาที</span>
             </div>
             <div class="baby-meta">
               <span id="headerBabyAge">อายุ 1 ขวบ 2 เดือน</span>
@@ -480,11 +481,11 @@
           </div>
         </div>
 
-        <!-- ESP32 Hardware Sleep & Active Timing Settings -->
+        <!-- Hardware Sleep & Active Timing Settings -->
         <div class="settings-group">
-          <h2 style="font-size: 1rem; font-weight: 700; margin-bottom: 6px;">⏱️ รอบการทำงาน & Deep Sleep (ESP32-S3)</h2>
+          <h2 style="font-size: 1rem; font-weight: 700; margin-bottom: 6px;">⏱️ รอบการทำงาน & ประหยัดพลังงาน (Deep Sleep อุปกรณ์)</h2>
           <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 12px;">
-            กำหนดเวลาระดับบอร์ด ESP32-S3 ให้ตื่นมาวัดตามเวลาที่ตั้งแล้วหลับลึกเพื่อประหยัดแบตเตอรี่ (ซิงก์ตรงกับ Firebase)
+            กำหนดเวลาระดับอุปกรณ์ ให้ตื่นมาวัดตามเวลาที่ตั้งแล้วหลับลึกเพื่อประหยัดแบตเตอรี่ (ซิงก์ตรงกับ Firebase ทันที)
           </p>
           <div class="form-row">
             <div style="display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 600; margin-bottom: 4px;">
@@ -500,8 +501,14 @@
             </div>
             <input type="range" id="settingSleepMinutes" class="form-range" min="1" max="60" step="1" value="5" oninput="document.getElementById('valSleepMinutes').textContent = this.value">
           </div>
+          <div style="display: flex; gap: 6px; margin-top: 6px; margin-bottom: 12px; flex-wrap: wrap;">
+            <button type="button" class="btn btn-outline" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 8px; border-color: #cbd5e1;" onclick="setDeepSleepPreset(1)">⚡ 1 นาที (เฝ้าระวัง)</button>
+            <button type="button" class="btn btn-outline" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 8px; border-color: #cbd5e1;" onclick="setDeepSleepPreset(3)">⏱️ 3 นาที</button>
+            <button type="button" class="btn btn-outline" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 8px; border-color: #cbd5e1;" onclick="setDeepSleepPreset(5)">⏱️ 5 นาที (มาตรฐาน)</button>
+            <button type="button" class="btn btn-outline" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 8px; border-color: #cbd5e1;" onclick="setDeepSleepPreset(10)">🔋 10 นาที (ประหยัดแบต)</button>
+          </div>
           <button type="button" class="btn btn-outline btn-block" style="border-color: #a7f3d0; background: #ecfdf5; color: #065f46; font-weight: 600;" onclick="syncTimingToFirebase()">
-            <span>⚡ ซิงก์เวลาประหยัดพลังงานเข้าบอร์ด ESP32 ทันที</span>
+            <span>⚡ ซิงก์เวลาประหยัดพลังงานเข้าอุปกรณ์ทันที</span>
           </button>
         </div>
 
@@ -512,20 +519,20 @@
           <div class="form-row">
             <label class="form-label" for="settingMode">โหมดการรับข้อมูล:</label>
             <select id="settingMode" class="form-select" onchange="onModeChange(this.value)">
-              <option value="firebase">🟢 เชื่อมต่อสด Firebase (ESP32 Live)</option>
+              <option value="firebase">🟢 เชื่อมต่อสด Firebase (Live Telemetry)</option>
               <option value="demo">🧪 โหมดทดสอบจำลอง (Simulation Demo)</option>
             </select>
           </div>
 
           <div class="form-row">
-            <label class="form-label" for="settingDeviceId">รหัสอุปกรณ์ ESP32 (Device ID):</label>
+            <label class="form-label" for="settingDeviceId">รหัสอุปกรณ์ (Device ID):</label>
             <input type="text" id="settingDeviceId" class="form-input" value="baby1" placeholder="เช่น baby1, baby2">
-            <small style="color: var(--text-muted); font-size: 0.72rem;">ตรงกับ `DEVICE_ID` ในโค้ด ESP32 เพื่อรับค่าเด็กคนนี้</small>
+            <small style="color: var(--text-muted); font-size: 0.72rem;">ตรงกับ `DEVICE_ID` ของอุปกรณ์เพื่อรับค่าเด็กคนนี้</small>
           </div>
 
           <div class="form-row">
             <label class="form-label" for="settingFirebaseUrl">Firebase RTDB URL:</label>
-            <input type="text" id="settingFirebaseUrl" class="form-input" value="https://babytemp-9beab-default-rtdb.asia-southeast1.firebasedatabase.app">
+            <input type="text" id="settingFirebaseUrl" class="form-input" value="https://babyteam-parent-default-rtdb.asia-southeast1.firebasedatabase.app">
           </div>
         </div>
 
