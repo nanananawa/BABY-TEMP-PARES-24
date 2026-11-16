@@ -13,6 +13,12 @@ let state = {
     avatar: "👶",
     deviceId: "baby1"
   },
+  emergencyContact: {
+    name: "สายด่วนแพทย์ฉุกเฉิน 1669",
+    phone: "1669"
+  },
+  nightAlarmEnabled: false,
+  nightAlarmSnoozedUntil: 0,
   activeWorkingSeconds: 15,
   deepSleepMinutes: 5,
   currentTemp: 37.0,
@@ -39,6 +45,8 @@ let timerTickInterval = null;
 let audioCtx = null;
 let deferredInstallPrompt = null;
 let wakeLockSentinel = null;
+let nightAlarmInterval = null;
+let lastDoctorReportText = "";
 
 // ==========================================
 // Initialization & Lifecycle
@@ -84,6 +92,8 @@ function loadState() {
       }
       if (parsed.alertThreshold) state.alertThreshold = parsed.alertThreshold;
       if (typeof parsed.soundEnabled !== "undefined") state.soundEnabled = parsed.soundEnabled;
+      if (typeof parsed.nightAlarmEnabled !== "undefined") state.nightAlarmEnabled = parsed.nightAlarmEnabled;
+      if (parsed.emergencyContact) state.emergencyContact = { ...state.emergencyContact, ...parsed.emergencyContact };
       if (parsed.mode) state.mode = parsed.mode;
       if (parsed.nextMedDue) state.nextMedDue = parsed.nextMedDue;
       if (Array.isArray(parsed.logs)) state.logs = parsed.logs;
@@ -140,12 +150,25 @@ function loadState() {
     const lbl = document.getElementById("valSleepMinutes");
     if (lbl) lbl.textContent = sleepInput.value;
   }
+  // Emergency Contact Inputs
+  const emergencyNameInput = document.getElementById("settingEmergencyName");
+  if (emergencyNameInput) emergencyNameInput.value = state.emergencyContact?.name || "สายด่วนแพทย์ฉุกเฉิน 1669";
+  const emergencyPhoneInput = document.getElementById("settingEmergencyPhone");
+  if (emergencyPhoneInput) emergencyPhoneInput.value = state.emergencyContact?.phone || "1669";
+
+  // Night Alarm Toggle Input
+  const nightAlarmCheck = document.getElementById("settingNightAlarm");
+  if (nightAlarmCheck) nightAlarmCheck.checked = !!state.nightAlarmEnabled;
+  updateNightAlarmUI();
+  updateEmergencyCallUI();
 }
 
 function saveState() {
   try {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({
       baby: state.baby,
+      emergencyContact: state.emergencyContact,
+      nightAlarmEnabled: state.nightAlarmEnabled,
       activeWorkingSeconds: state.activeWorkingSeconds,
       deepSleepMinutes: state.deepSleepMinutes,
       firebaseUrl: state.firebaseUrl,
@@ -309,7 +332,13 @@ function updateUI() {
     playAlertTone();
   }
 
-  // 7. Refresh Chart
+  // 7. Night Alarm check
+  checkNightAlarmTrigger();
+
+  // 8. Update Emergency Call UI
+  updateEmergencyCallUI();
+
+  // 9. Refresh Chart
   if (chartInstance) {
     updateChartData();
   }
@@ -852,8 +881,9 @@ function openDoctorReportModal() {
 
   const medCount = logs24h.filter(l => l.type === "med").length;
   const spongeCount = logs24h.filter(l => l.type === "sponge").length;
+  const milkCount = logs24h.filter(l => l.type === "milk").length;
 
-  const text = `
+  lastDoctorReportText = `
 📋 รายงานสรุปอาการสำหรับแพทย์ (BabyTemp Doctor Report)
 =============================================
 👶 ชื่อผู้ป่วยเด็ก: ${state.baby.name}
@@ -869,22 +899,103 @@ function openDoctorReportModal() {
 💊 ประวัติการดูแลย้อนหลัง 24 ชม.:
 - ป้อนยาลดไข้: ทั้งหมด ${medCount} ครั้ง
 - เช็ดตัวลดไข้: ทั้งหมด ${spongeCount} ครั้ง
+- ดื่มนม / น้ำ: ทั้งหมด ${milkCount} ครั้ง
 
 📝 ลำดับเหตุการณ์บันทึก (Timeline):
 ${logs24h.map(l => {
   const tStr = new Date(l.time).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
-  return `• [${tStr} น.] (${l.type.toUpperCase()}) ${l.note || ''} ${l.medDose ? `[${l.medDose}]` : ''} (ไข้: ${l.temp ? l.temp.toFixed(1) + '°C' : '-'})`;
+  const typeMap = { med: 'ป้อนยา', sponge: 'เช็ดตัว', milk: 'นม/น้ำ', symptom: 'อาการ' };
+  return `• [${tStr} น.] (${typeMap[l.type] || l.type.toUpperCase()}) ${l.note || ''} ${l.medDose ? `[${l.medDose}]` : ''} (ไข้: ${l.temp ? l.temp.toFixed(1) + '°C' : '-'})`;
 }).join('\n') || 'ไม่มีบันทึกกิจกรรม'}
 =============================================
 `;
 
-  content.innerText = text;
+  const timelineRows = logs24h.slice(0, 8).map(l => {
+    const tStr = new Date(l.time).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+    const typeIcons = { med: '💊 ป้อนยา', sponge: '🧽 เช็ดตัว', milk: '🍼 นม/น้ำ', symptom: '🩺 อาการ' };
+    return `
+      <tr>
+        <td style="white-space: nowrap; font-weight: 700;">${tStr} น.</td>
+        <td style="white-space: nowrap;">${typeIcons[l.type] || l.type}</td>
+        <td>${l.medDose ? `<strong>${l.medDose}</strong> ` : ''}${l.note || '-'}</td>
+        <td style="white-space: nowrap; text-align: right; font-weight: 700; color: #dc2626;">${l.temp ? l.temp.toFixed(1) + '°C' : '-'}</td>
+      </tr>
+    `;
+  }).join('');
+
+  content.innerHTML = `
+    <div class="doctor-card">
+      <div class="doctor-card-header">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+          <div>
+            <div style="font-size: 1.05rem; font-weight: 800; color: #0f172a;">📋 สรุปประวัติไข้ & การดูแล 24 ชม.</div>
+            <div style="font-size: 0.74rem; color: #64748b;">BabyTemp Parent Health Report</div>
+          </div>
+          <span class="doctor-pill" style="background: #e0f2fe; color: #0369a1; border-color: #bae6fd;">24 ชั่วโมง</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px; font-size: 0.82rem; background: #f8fafc; padding: 8px 10px; border-radius: 6px;">
+          <div><strong>👶 น้อง:</strong> ${state.baby.name}</div>
+          <div><strong>🏥 HN:</strong> ${state.baby.hn || "-"}</div>
+          <div><strong>🎂 อายุ:</strong> ${state.baby.age || "-"}</div>
+          <div><strong>⚖️ น้ำหนัก:</strong> ${state.baby.weight} กก.</div>
+        </div>
+      </div>
+
+      <div class="doctor-stat-grid">
+        <div class="doctor-stat-box highlight">
+          <div style="font-size: 0.7rem; color: #991b1b; font-weight: 700;">🌡️ ไข้สูงสุด</div>
+          <div class="doctor-stat-val">${maxT}°C</div>
+        </div>
+        <div class="doctor-stat-box">
+          <div style="font-size: 0.7rem; color: #0369a1; font-weight: 700;">❄️ ไข้ต่ำสุด</div>
+          <div class="doctor-stat-val" style="color: #0284c7;">${minT}°C</div>
+        </div>
+        <div class="doctor-stat-box">
+          <div style="font-size: 0.7rem; color: #475569; font-weight: 700;">⏱️ ไข้ล่าสุด</div>
+          <div class="doctor-stat-val" style="color: #0f172a;">${state.currentTemp.toFixed(1)}°C</div>
+        </div>
+      </div>
+
+      <div class="doctor-summary-pills">
+        <span class="doctor-pill">💊 ป้อนยา: ${medCount} ครั้ง</span>
+        <span class="doctor-pill" style="background: #f0fdf4; color: #166534; border-color: #bbf7d0;">🧽 เช็ดตัว: ${spongeCount} ครั้ง</span>
+        <span class="doctor-pill" style="background: #fefce8; color: #854d0e; border-color: #fef08a;">🍼 นม/น้ำ: ${milkCount} ครั้ง</span>
+      </div>
+
+      <div style="margin-top: 12px;">
+        <div style="font-size: 0.82rem; font-weight: 700; margin-bottom: 6px; color: #334155;">📝 ไทม์ไลน์บันทึกล่าสุด:</div>
+        ${logs24h.length > 0 ? `
+          <div style="overflow-x: auto;">
+            <table class="doctor-timeline-table">
+              <thead>
+                <tr>
+                  <th>เวลา</th>
+                  <th>กิจกรรม</th>
+                  <th>รายละเอียด</th>
+                  <th style="text-align: right;">อุณหภูมิ</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${timelineRows}
+              </tbody>
+            </table>
+          </div>
+        ` : `<div style="font-size: 0.8rem; color: #94a3b8; padding: 10px 0; text-align: center;">ยังไม่มีบันทึกกิจกรรมในรอบ 24 ชั่วโมง</div>`}
+      </div>
+
+      <div style="margin-top: 12px; font-size: 0.7rem; color: #94a3b8; text-align: center; border-top: 1px solid #f1f5f9; padding-top: 8px;">
+        สร้างรายงานเมื่อ ${new Date().toLocaleDateString('th-TH')} เวลา ${new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })} น.
+      </div>
+    </div>
+  `;
+
   openModal("doctorReportModal");
 }
 
 function copyDoctorReportText() {
-  const content = document.getElementById("doctorReportContent").innerText;
-  navigator.clipboard.writeText(content).then(() => {
+  const text = lastDoctorReportText || document.getElementById("doctorReportContent")?.innerText || "";
+  navigator.clipboard.writeText(text).then(() => {
     showToast("📋 คัดลอกรายงานเรียบร้อยแล้ว ส่งใน LINE ได้ทันที");
   }).catch(() => {
     showToast("คัดลอกไม่สำเร็จ กรุณาลองอีกครั้ง");
@@ -1243,6 +1354,9 @@ function saveParentSettings() {
   const activeSec = parseInt(document.getElementById("settingActiveSeconds")?.value) || 15;
   const sleepMin = parseFloat(document.getElementById("settingSleepMinutes")?.value) || 5;
 
+  const emergencyName = (document.getElementById("settingEmergencyName")?.value || "").trim();
+  const emergencyPhone = (document.getElementById("settingEmergencyPhone")?.value || "").trim();
+
   state.baby.hn = hn || "HN-00123";
   state.baby.name = name || "น้องพอใจ";
   state.baby.weight = weight;
@@ -1253,6 +1367,13 @@ function saveParentSettings() {
   state.alertThreshold = alertTemp;
   state.activeWorkingSeconds = activeSec;
   state.deepSleepMinutes = sleepMin;
+
+  state.emergencyContact = {
+    name: emergencyName || "สายด่วนแพทย์ฉุกเฉิน 1669",
+    phone: emergencyPhone || "1669"
+  };
+
+  updateEmergencyCallUI();
 
   // Sync to calculator weight input
   document.getElementById("calcWeightInput").value = weight;
@@ -1561,3 +1682,188 @@ function initPwa() {
     }
   });
 }
+
+// ==========================================
+// Emergency Speed-Dial & Presets
+// ==========================================
+function updateEmergencyCallUI() {
+  const name = state.emergencyContact?.name || "สายด่วนแพทย์ฉุกเฉิน 1669";
+  const phone = state.emergencyContact?.phone || "1669";
+
+  const homeTitle = document.getElementById("homeEmergencyTitle");
+  if (homeTitle) homeTitle.textContent = `${name} (${phone})`;
+
+  const btnCall = document.getElementById("btnEmergencyCall");
+  if (btnCall) btnCall.href = `tel:${phone}`;
+
+  const guideBtn = document.getElementById("guideEmergencyCallBtn");
+  if (guideBtn) guideBtn.href = `tel:${phone}`;
+  const guideText = document.getElementById("guideEmergencyPhoneText");
+  if (guideText) guideText.textContent = `${name} (${phone})`;
+
+  const checklistBtn = document.getElementById("checklistEmergencyCallBtn");
+  if (checklistBtn) checklistBtn.href = `tel:${phone}`;
+
+  const nightBtn = document.getElementById("nightAlarmCallBtn");
+  if (nightBtn) nightBtn.href = `tel:${phone}`;
+}
+
+function setEmergencyPreset(name, phone) {
+  const nameInput = document.getElementById("settingEmergencyName");
+  const phoneInput = document.getElementById("settingEmergencyPhone");
+  if (nameInput) nameInput.value = name;
+  if (phoneInput) phoneInput.value = phone;
+  state.emergencyContact = { name, phone };
+  saveState();
+  updateEmergencyCallUI();
+  showToast(`📞 เลือกเบอร์ฉุกเฉิน: ${name} (${phone})`);
+}
+window.setEmergencyPreset = setEmergencyPreset;
+
+// ==========================================
+// Continuous Night Alarm Mode (โหมดปลุกกลางคืน)
+// ==========================================
+function toggleNightAlarm(forceState) {
+  if (typeof forceState === "boolean") {
+    state.nightAlarmEnabled = forceState;
+  } else {
+    state.nightAlarmEnabled = !state.nightAlarmEnabled;
+  }
+
+  updateNightAlarmUI();
+  saveState();
+
+  if (state.nightAlarmEnabled) {
+    showToast("🌙 เปิดโหมดเฝ้าระวังกลางคืนแล้ว (ระบบจะปลุกวนซ้ำเมื่อมีไข้สูง)");
+    unlockAudio();
+    checkNightAlarmTrigger();
+  } else {
+    dismissNightAlarm(false);
+    showToast("🌙 ปิดโหมดเฝ้าระวังกลางคืนแล้ว");
+  }
+}
+window.toggleNightAlarm = toggleNightAlarm;
+
+function updateNightAlarmUI() {
+  const btn = document.getElementById("btnNightAlarm");
+  if (btn) {
+    if (state.nightAlarmEnabled) {
+      btn.classList.add("night-active");
+    } else {
+      btn.classList.remove("night-active");
+    }
+  }
+
+  const chk = document.getElementById("settingNightAlarm");
+  const track = document.getElementById("nightAlarmSwitchTrack");
+  const thumb = document.getElementById("nightAlarmSwitchThumb");
+  if (chk) chk.checked = !!state.nightAlarmEnabled;
+  if (track && thumb) {
+    if (state.nightAlarmEnabled) {
+      track.style.backgroundColor = "#7c3aed";
+      thumb.style.transform = "translateX(22px)";
+    } else {
+      track.style.backgroundColor = "#cbd5e1";
+      thumb.style.transform = "translateX(0)";
+    }
+  }
+}
+
+function checkNightAlarmTrigger() {
+  if (!state.nightAlarmEnabled) return;
+  if (state.sensorError) return;
+
+  const isFeverHigh = state.currentTemp >= state.alertThreshold;
+  const isSnoozed = Date.now() < (state.nightAlarmSnoozedUntil || 0);
+
+  if (isFeverHigh && !isSnoozed) {
+    startNightAlarmAlert();
+  } else if (!isFeverHigh && nightAlarmInterval) {
+    dismissNightAlarm(false);
+  }
+}
+
+function startNightAlarmAlert() {
+  const modal = document.getElementById("nightAlarmModal");
+  const tempElem = document.getElementById("nightAlarmTemp");
+  if (tempElem) tempElem.textContent = `${state.currentTemp.toFixed(1)}°C`;
+  if (modal) modal.style.display = "flex";
+
+  if (!nightAlarmInterval) {
+    playNightAlarmBeep();
+    nightAlarmInterval = setInterval(() => {
+      playNightAlarmBeep();
+      if (navigator.vibrate) {
+        navigator.vibrate([400, 200, 400, 200]);
+      }
+    }, 1100);
+  }
+}
+
+function playNightAlarmBeep() {
+  try {
+    initAudioContext();
+    if (!audioCtx) return;
+    if (audioCtx.state === "suspended") audioCtx.resume();
+
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(880, audioCtx.currentTime); // A5
+    osc.frequency.setValueAtTime(1046.5, audioCtx.currentTime + 0.18); // C6
+
+    gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.45);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.45);
+  } catch (e) {
+    console.warn("Night alarm sound error:", e);
+  }
+}
+
+function dismissNightAlarm(snooze = true) {
+  if (nightAlarmInterval) {
+    clearInterval(nightAlarmInterval);
+    nightAlarmInterval = null;
+  }
+
+  const modal = document.getElementById("nightAlarmModal");
+  if (modal) modal.style.display = "none";
+
+  if (snooze) {
+    state.nightAlarmSnoozedUntil = Date.now() + 15 * 60 * 1000; // Snooze for 15 minutes
+    showToast("✋ ปิดเสียงปลุกแล้ว (ระบบจะเฝ้าระวังและเตือนใหม่ใน 15 นาที หากไข้ยังสูง)");
+  }
+}
+window.dismissNightAlarm = dismissNightAlarm;
+
+// ==========================================
+// Interactive Red Flag Checklist
+// ==========================================
+function checkRedFlagStatus() {
+  const checkboxes = document.querySelectorAll(".redflag-chk");
+  const resultBox = document.getElementById("redFlagResultBox");
+  let anyChecked = false;
+  checkboxes.forEach(cb => {
+    if (cb.checked) anyChecked = true;
+  });
+
+  if (resultBox) {
+    resultBox.style.display = anyChecked ? "block" : "none";
+  }
+}
+window.checkRedFlagStatus = checkRedFlagStatus;
+
+function resetRedFlagChecklist() {
+  const checkboxes = document.querySelectorAll(".redflag-chk");
+  checkboxes.forEach(cb => cb.checked = false);
+  const resultBox = document.getElementById("redFlagResultBox");
+  if (resultBox) resultBox.style.display = "none";
+  showToast("🔄 ล้างค่าการเช็กอาการแล้ว");
+}
+window.resetRedFlagChecklist = resetRedFlagChecklist;

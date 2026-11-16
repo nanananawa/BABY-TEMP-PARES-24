@@ -1,5 +1,5 @@
 // BabyTemp Parent - Service Worker
-const CACHE_NAME = 'babytemp-parent-v1.0';
+const CACHE_NAME = 'babytemp-parent-v1.1';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

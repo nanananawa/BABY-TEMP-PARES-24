@@ -50,6 +50,10 @@
           <button id="btnSoundToggle" class="btn-icon active" title="เปิด/ปิดเสียงเตือนไข้" onclick="toggleSound()">
             <span id="soundIcon">🔔</span>
           </button>
+          <!-- Night-time Alarm Toggle -->
+          <button id="btnNightAlarm" class="btn-icon" title="เปิด/ปิดโหมดเตือนปลุกกลางคืน (ส่งเสียงดังต่อเนื่องเมื่อมีไข้สูง)" onclick="toggleNightAlarm()">
+            <span id="nightAlarmIcon">🌙</span>
+          </button>
           <!-- Quick Settings -->
           <button class="btn-icon" title="ตั้งค่าระบบ" onclick="switchTab('settings')">
             <span>⚙️</span>
@@ -114,6 +118,20 @@
             <div><strong>อุปกรณ์ขาดการเชื่อมต่อ</strong></div>
             <div style="font-size: 0.75rem; opacity: 0.9;">ไม่ได้รับข้อมูลเกิน 10 นาที โปรดตรวจเช็คแบตเตอรี่และสัญญาณ WiFi ของอุปกรณ์</div>
           </div>
+        </div>
+
+        <!-- Emergency Speed-Dial Card -->
+        <div class="emergency-call-card" id="homeEmergencyCard">
+          <div class="emergency-call-info">
+            <span class="emergency-call-icon">🚨</span>
+            <div>
+              <div class="emergency-call-title" id="homeEmergencyTitle">สายด่วนแพทย์ฉุกเฉิน 1669</div>
+              <div class="emergency-call-desc">กดโทรออกได้ทันทีเมื่อน้องมีอาการวิกฤต</div>
+            </div>
+          </div>
+          <a id="btnEmergencyCall" href="tel:1669" class="btn btn-emergency">
+            <span>📞 โทรด่วน</span>
+          </a>
         </div>
         
         <!-- Big Hero Monitor Card -->
@@ -238,6 +256,16 @@
           </div>
         </div>
 
+        <!-- Quick Doctor Report & Guide Banner -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; margin-bottom: 14px;">
+          <button type="button" class="btn btn-outline" style="border-color: var(--primary); color: var(--primary); font-weight: 700; padding: 10px;" onclick="openDoctorReportModal()">
+            <span>🩺 การ์ดส่งหมอ (24 ชม.)</span>
+          </button>
+          <button type="button" class="btn btn-outline" style="border-color: #ef4444; color: #dc2626; font-weight: 700; padding: 10px;" onclick="switchTab('guide')">
+            <span>🚨 เช็คสัญญาณอันตราย</span>
+          </button>
+        </div>
+
       </section>
 
       <!-- ========================================== -->
@@ -354,6 +382,63 @@
       <!-- ========================================== -->
       <section id="tab-guide" class="tab-content">
         
+        <!-- Emergency Quick Call Banner in Guide -->
+        <div style="margin-bottom: 14px;">
+          <a id="guideEmergencyCallBtn" href="tel:1669" class="btn btn-emergency btn-block" style="text-decoration: none; padding: 12px; font-size: 0.95rem;">
+            <span>🚨 โทรขอความช่วยเหลือด่วน: <span id="guideEmergencyPhoneText">1669</span></span>
+          </a>
+        </div>
+
+        <!-- Interactive Red Flag Self-Assessment -->
+        <div class="checklist-card" style="border: 1.5px solid #fecaca; background: #fffbfb;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+            <h3 style="font-size: 0.95rem; font-weight: 800; color: #991b1b;">
+              📋 เช็กลิสต์ประเมินอาการด่วน (คลิกเลือกถ้ามี)
+            </h3>
+            <button type="button" class="btn btn-outline" style="padding: 2px 8px; font-size: 0.7rem;" onclick="resetRedFlagChecklist()">ล้างค่า</button>
+          </div>
+          <p style="font-size: 0.78rem; color: #7f1d1d; margin-bottom: 10px;">
+            หากติ๊กเลือกข้อใดข้อหนึ่ง แสดงว่าน้องอาจเข้าสู่ภาวะวิกฤต ควรรีบติดต่อแพทย์ทันที
+          </p>
+
+          <label class="checklist-item">
+            <input type="checkbox" class="redflag-chk" onchange="checkRedFlagStatus()">
+            <span>1. ทารกแรกเกิดอายุ <strong>ต่ำกว่า 3 เดือน</strong> และมีไข้สูงเกิน 38°C</span>
+          </label>
+          <label class="checklist-item">
+            <input type="checkbox" class="redflag-chk" onchange="checkRedFlagStatus()">
+            <span>2. ซึมมาก ไม่สบตา ปลุกไม่ค่อยตื่น หรือร้องกวนงอแงไม่หยุด</span>
+          </label>
+          <label class="checklist-item">
+            <input type="checkbox" class="redflag-chk" onchange="checkRedFlagStatus()">
+            <span>3. หายใจเร็ว หอบเหนื่อย ปีกจมูกบาน หน้าอกหรือชายโครงบุ๋ม</span>
+          </label>
+          <label class="checklist-item">
+            <input type="checkbox" class="redflag-chk" onchange="checkRedFlagStatus()">
+            <span>4. มีอาการ <strong>ชักเกร็ง</strong> กระตุก หรือตาค้างตาลอย</span>
+          </label>
+          <label class="checklist-item">
+            <input type="checkbox" class="redflag-chk" onchange="checkRedFlagStatus()">
+            <span>5. อาเจียนตลอด ดื่มน้ำไม่ได้เลย ปากแห้ง หรือไม่ปัสสาวะนานเกิน 6 ชม.</span>
+          </label>
+          <label class="checklist-item">
+            <input type="checkbox" class="redflag-chk" onchange="checkRedFlagStatus()">
+            <span>6. มีจุดเลือดออก ผื่นแดง หรือผิวหนังลายเขียวคล้ำ</span>
+          </label>
+          <label class="checklist-item">
+            <input type="checkbox" class="redflag-chk" onchange="checkRedFlagStatus()">
+            <span>7. ไข้สูงลอยเกิน 39.5°C ต่อเนื่อง หรือมีไข้นานเกิน 3 วัน</span>
+          </label>
+
+          <div id="redFlagResultBox" style="display: none; margin-top: 12px; padding: 12px; background: #fee2e2; border: 1.5px solid #dc2626; border-radius: 8px; color: #991b1b;">
+            <div style="font-weight: 800; font-size: 0.95rem; margin-bottom: 4px;">⚠️ ตรวจพบสัญญาณอันตราย!</div>
+            <div style="font-size: 0.82rem; margin-bottom: 8px;">น้องมีอาการเสี่ยงที่ต้องได้รับการตรวจจากแพทย์โดยเร็วที่สุด กรุณาอย่ารอช้า</div>
+            <a id="checklistEmergencyCallBtn" href="tel:1669" class="btn btn-emergency btn-block" style="text-decoration: none;">
+              <span>📞 กดโทรฉุกเฉินทันที</span>
+            </a>
+          </div>
+        </div>
+
         <!-- Emergency Red Flags -->
         <div class="guide-card" style="border: 2px solid #fecaca; background: #fff5f5;">
           <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; color: #991b1b;">
@@ -536,6 +621,56 @@
           </div>
         </div>
 
+        <!-- Emergency Contact Settings -->
+        <div class="settings-group">
+          <h2 style="font-size: 1rem; font-weight: 700; margin-bottom: 8px; color: #dc2626;">
+            🚨 เบอร์โทรฉุกเฉิน (Emergency Speed-Dial)
+          </h2>
+          <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 12px;">
+            ระบุเบอร์ติดต่อฉุกเฉินเพื่อให้กดโทรออกได้ทันทีจากหน้าจอ เมื่อน้องมีอาการวิกฤต
+          </p>
+          
+          <div class="form-row">
+            <label class="form-label" for="settingEmergencyName">ชื่อผู้ติดต่อ / หน่วยงาน:</label>
+            <input type="text" id="settingEmergencyName" class="form-input" value="สายด่วนแพทย์ฉุกเฉิน 1669" placeholder="เช่น สายด่วน 1669, พยาบาลวอร์ด, คุณพ่อ">
+          </div>
+
+          <div class="form-row">
+            <label class="form-label" for="settingEmergencyPhone">เบอร์โทรศัพท์ (กดโทรออกได้ทันที):</label>
+            <input type="tel" id="settingEmergencyPhone" class="form-input" value="1669" placeholder="เช่น 1669 หรือ 0812345678" style="font-family: monospace; font-weight: 700;">
+          </div>
+
+          <div style="display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap;">
+            <button type="button" class="btn btn-outline" style="padding: 4px 10px; font-size: 0.75rem;" onclick="setEmergencyPreset('สายด่วนแพทย์ฉุกเฉิน 1669', '1669')">🚑 1669</button>
+            <button type="button" class="btn btn-outline" style="padding: 4px 10px; font-size: 0.75rem;" onclick="setEmergencyPreset('พยาบาลวอร์ดเด็ก', '021234567')">🏥 พยาบาลวอร์ด</button>
+            <button type="button" class="btn btn-outline" style="padding: 4px 10px; font-size: 0.75rem;" onclick="setEmergencyPreset('คุณพ่อ', '0812345678')">👨 คุณพ่อ</button>
+            <button type="button" class="btn btn-outline" style="padding: 4px 10px; font-size: 0.75rem;" onclick="setEmergencyPreset('คุณแม่', '0898765432')">👩 คุณแม่</button>
+          </div>
+        </div>
+
+        <!-- Night Alarm Settings -->
+        <div class="settings-group">
+          <h2 style="font-size: 1rem; font-weight: 700; margin-bottom: 8px; color: #6d28d9;">
+            🌙 โหมดเฝ้าระวังกลางคืน (Continuous Night Alarm)
+          </h2>
+          <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 12px;">
+            เมื่อเปิดโหมดนี้ หากน้องมีไข้สูงแตะเกณฑ์ ระบบจะส่งเสียงปลุกดังวนซ้ำต่อเนื่องจนกว่าผู้ปกครองจะตื่นมากดปิด เพื่อความปลอดภัยสูงสุดขณะนอนหลับ
+          </p>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 6px 0;">
+            <div>
+              <strong style="font-size: 0.9rem;">เปิดใช้งานเสียงปลุกวนซ้ำกลางคืน</strong>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">ปลุกทันทีเมื่อไข้สูงเกินเกณฑ์</div>
+            </div>
+            <label style="position: relative; display: inline-block; width: 48px; height: 26px;">
+              <input type="checkbox" id="settingNightAlarm" style="opacity: 0; width: 0; height: 0;" onchange="toggleNightAlarm(this.checked)">
+              <span id="nightAlarmSwitchTrack" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .3s; border-radius: 26px;">
+                <span id="nightAlarmSwitchThumb" style="position: absolute; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%;"></span>
+              </span>
+            </label>
+          </div>
+        </div>
+
         <!-- Alert Thresholds -->
         <div class="settings-group">
           <h2 style="font-size: 1rem; font-weight: 700; margin-bottom: 12px;">🔔 การแจ้งเตือน & อุณหภูมิ</h2>
@@ -670,6 +805,36 @@
       </div>
     </div>
 
+    <!-- Modal: Night Alarm Wake-Up Alert (Continuous) -->
+    <div class="modal-overlay night-alarm-overlay" id="nightAlarmModal" style="display: none;">
+      <div class="modal-sheet night-alarm-sheet">
+        <div class="night-alarm-pulse">🚨</div>
+        <h2 style="font-size: 1.25rem; font-weight: 800; color: #dc2626; margin: 4px 0;">
+          ปลุกฉุกเฉิน! น้องมีไข้สูง
+        </h2>
+        <div style="font-size: 2.5rem; font-weight: 800; color: #dc2626; margin: 6px 0;" id="nightAlarmTemp">
+          39.2°C
+        </div>
+        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 16px;">
+          อุณหภูมิน้องสูงเกินเกณฑ์ความปลอดภัย รีบตื่นมาดูน้องและเช็ดตัวทันที
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+          <button type="button" class="btn btn-primary btn-block" style="background: #dc2626; border-color: #dc2626; padding: 14px; font-size: 0.95rem; font-weight: 700;" onclick="dismissNightAlarm()">
+            <span>✋ ปิดเสียงปลุก (รับทราบแล้ว / เตือนใหม่ใน 15 นาที)</span>
+          </button>
+          <div style="display: flex; gap: 8px;">
+            <a id="nightAlarmCallBtn" href="tel:1669" class="btn btn-emergency" style="flex: 1; text-decoration: none; padding: 10px; font-size: 0.88rem; justify-content: center;">
+              <span>📞 โทรฉุกเฉิน</span>
+            </a>
+            <button type="button" class="btn btn-outline" style="flex: 1; padding: 10px; font-size: 0.88rem;" onclick="dismissNightAlarm(); switchTab('guide');">
+              <span>🧽 วิธีเช็ดตัว</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Toast Notification Popup -->
     <div class="toast-box" id="toastBox">
       <span id="toastIcon">ℹ️</span>
@@ -678,6 +843,6 @@
 
   </div>
 
-  <script src="app.js?v=1.0"></script>
+  <script src="app.js?v=1.1"></script>
 </body>
 </html>
